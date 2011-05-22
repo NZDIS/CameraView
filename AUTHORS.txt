@@ -1,2 +1,3 @@
-Mariusz Nowostawski, University of Otago, NZDIS Team <nowostawski@gmail.com>
+Ethan Rublee, OpenCV original example code
+Mariusz Nowostawski, University of Otago <nowostawski@gmail.com>
 

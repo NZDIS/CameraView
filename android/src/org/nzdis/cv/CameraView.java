@@ -50,7 +50,12 @@ import org.nzdis.cv.jni.cameraview;
  * For details on the original code check CVCamera from 
  * <code>http://opencv.willowgarage.com/wiki/Android</code> 
  * 
+ * Original
+ * @author Ethan 
+ *
+ * Modified:
  * @author Mariusz Nowostawski <mariusz@nowostawski.org>
+ *
  *
  * @version $Revision$ <br>
  * Created: May 22, 2011 11:21:00 AM
@@ -65,6 +70,8 @@ public class CameraView extends Activity {
 	private static final int DIALOG_TUTORIAL_SURF = 4;
 	private static final int DIALOG_TUTORIAL_STAR = 5;
 	private static final int DIALOG_TUTORIAL_CHESS = 6;
+	private static final int DIALOG_TUTORIAL_FACE = 7;
+	
 	private boolean captureChess;
 
 	ProgressDialog makeCalibDialog() {
@@ -171,6 +178,7 @@ public class CameraView extends Activity {
 		menu.add("FAST");
 		menu.add("STAR");
 		menu.add("SURF");
+		menu.add("Face");
 		menu.add("Chess");
 		menu.add("Settings");
 		return true;
@@ -202,6 +210,11 @@ public class CameraView extends Activity {
 			
 			defaultcallbackstack.addFirst(new SURFProcessor());
 			makeToast(DIALOG_TUTORIAL_SURF);
+			
+		} else if (item.getTitle().equals("Face")) {
+			
+			defaultcallbackstack.addFirst(new FaceProcessor());
+			makeToast(DIALOG_TUTORIAL_FACE);
 			
 		} else if (item.getTitle().equals("Settings")) {
 			
@@ -334,6 +347,10 @@ public class CameraView extends Activity {
 			Toast.makeText(this, "Detecting and Displaying FAST features",
 					Toast.LENGTH_LONG).show();
 			break;
+		case DIALOG_TUTORIAL_FACE:
+			Toast.makeText(this, "Detecting and Displaying Faces",
+				   Toast.LENGTH_LONG).show();
+				break;
 		case DIALOG_TUTORIAL_SURF:
 			Toast.makeText(this, "Detecting and Displaying SURF features",
 					Toast.LENGTH_LONG).show();
@@ -389,6 +406,14 @@ public class CameraView extends Activity {
 		}
 	}
 
+	class FaceProcessor implements NativeProcessor.PoolCallback {
+		
+		@Override
+		public void process(int idx, image_pool pool, long timestamp,
+							NativeProcessor nativeProcessor) {
+			processor.detectAndDrawFace(idx, pool);
+		}
+	}
 	
 	String calib_text = null;
 	String calib_file_loc = null;

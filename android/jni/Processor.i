@@ -36,6 +36,7 @@ public:
 	
 	void detectAndDrawFeatures(int idx, image_pool* pool, int feature_type);
 
+	bool detectAndDrawFace(int idx, image_pool * pool);
 	bool detectAndDrawChessboard(int idx,image_pool* pool);
 	
 	void resetChess();

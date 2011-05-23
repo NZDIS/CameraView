@@ -8,6 +8,7 @@
 #ifndef PROCESSOR_H_
 #define PROCESSOR_H_
 
+#include <cv.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -30,7 +31,8 @@ public:
   virtual ~Processor();
 
   void detectAndDrawFeatures(int idx, image_pool* pool, int feature_type);
-
+	
+  bool detectAndDrawFace(int idx, image_pool* pool);
   bool detectAndDrawChessboard(int idx, image_pool* pool);
 
   void resetChess();

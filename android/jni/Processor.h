@@ -3,6 +3,10 @@
  *
  *  Created on: Jun 13, 2010
  *      Author: ethan
+ *
+ *  Modified:
+ *      Author: Mariusz Nowostawski
+ *
  */
 
 #ifndef PROCESSOR_H_
@@ -19,9 +23,20 @@
 
 #include "image_pool.h"
 
+// Adding support for logging
+#include <android/log.h> 
+
+#define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, "NZDIS CameraView", __VA_ARGS__) 
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG  , "NZDIS CameraView", __VA_ARGS__) 
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO   , "NZDIS CameraView", __VA_ARGS__) 
+#define LOGW(...) __android_log_print(ANDROID_LOG_WARN   , "NZDIS CameraView", __VA_ARGS__) 
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR  , "NZDIS CameraView", __VA_ARGS__) 
+
+// FD constants
 #define DETECT_FAST 0
 #define DETECT_STAR 1
 #define DETECT_SURF 2
+
 
 class Processor
 {
@@ -54,6 +69,15 @@ private:
   cv::Mat distortion;
   cv::Size imgsize;
 
+  // Create memory for calculations
+  CvMemStorage* storage;
+	
+  // Create a new Haar classifier
+  CvHaarClassifierCascade* cascade;
+	
+  // String that contains the cascade name
+  char* cascade_name;	
+	
 };
 
 #endif /* PROCESSOR_H_ */

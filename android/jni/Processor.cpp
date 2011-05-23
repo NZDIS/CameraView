@@ -3,6 +3,9 @@
  *
  *  Created on: Jun 13, 2010
  *      Author: ethan
+ *
+ *  Modified:
+ *      Author: Mariusz Nowostawski
  */
 
 #include "Processor.h"
@@ -16,12 +19,22 @@ Processor::Processor() :
       fastd(20/*threshold*/, true/*nonmax_suppression*/),
       surfd(100./*hessian_threshold*/, 1/*octaves*/, 2/*octave_layers*/)
 {
+	cascade_name = (char *)"/sdcard/nzdis/haarcascade_frontalface_alt.xml";
+	/*"haarcascade_profileface.xml";*/
 
+LOGI("About to allocate storage memory...");	
+	storage = cvCreateMemStorage(0);
+LOGI("Done. About to load the cascade...");
+	// Load the HaarClassifierCascade
+    cascade = (CvHaarClassifierCascade *) cvLoad(cascade_name, 0, 0, 0);
+LOGI("Cascade loaded!");    
+	
 }
 
 Processor::~Processor()
 {
-  // TODO Auto-generated destructor stub
+	cvReleaseHaarClassifierCascade(&cascade);
+    cvReleaseMemStorage(&storage);
 }
 
 void Processor::detectAndDrawFeatures(int input_idx, image_pool* pool, int feature_type)
@@ -161,28 +174,26 @@ bool Processor::detectAndDrawChessboard(int idx, image_pool* pool)
  */
 bool Processor::detectAndDrawFace(int idx, image_pool* pool)
 {	
-	// Create memory for calculations
-	static CvMemStorage* storage = 0;
-	
-	// Create a new Haar classifier
-	static CvHaarClassifierCascade* cascade = 0;	
-	
-	// Create a string that contains the cascade name
-	const char* cascade_name = "haarcascades/haarcascade_frontalface_alt.xml";
-	/*"haarcascade_profileface.xml";*/
-	
-	// Load the HaarClassifierCascade
-    cascade = (CvHaarClassifierCascade *) cvLoad(cascade_name, 0, 0, 0);
-    
+
     // Check whether the cascade has loaded successfully. Else report and error and quit.
-    if( !cascade ) return false;
-    
-	Mat mat = pool->getImage(idx);
+    if( !cascade ) {
+		LOGE("Couldn't load the HAAR cascade.");
+		return false;
+    }
+    if( !storage ) {
+		LOGE("Couldn't allocate storage...");
+		return false;
+    }
+	// Clear previous memory
+	cvClearMemStorage(storage);
 	
-	CvSeq* faces = cvHaarDetectObjects(&mat, cascade, storage,
+	Mat mat = pool->getImage(idx);
+	IplImage img = mat;
+LOGI("Image retrieved.");	
+	CvSeq* faces = cvHaarDetectObjects(&img, cascade, storage,
 									   1.1, 2, CV_HAAR_DO_CANNY_PRUNING,
 									   cvSize(40, 40));
-	
+LOGI("Faces detected through HaarDetectObjects.");		
 	// Create two points to represent the face locations
     CvPoint pt1, pt2;
 	int scale = 1;
@@ -199,7 +210,7 @@ bool Processor::detectAndDrawFace(int idx, image_pool* pool)
 		pt1.y = r->y*scale;
 		pt2.y = (r->y+r->height)*scale;
 		// Draw the rectangle in the input image
-		cvRectangle(&mat, pt1, pt2, CV_RGB(255,0,0), 3, 8, 0 );
+		cvRectangle(&img, pt1, pt2, CV_RGB(255,0,0), 3, 8, 0 );
 	}
 
 	// Show the image in the window named "result"

@@ -179,7 +179,7 @@ public class CameraView extends Activity {
 		menu.add("STAR");
 		menu.add("SURF");
 		menu.add("Face");
-		menu.add("Chess");
+		//menu.add("Chess");
 		menu.add("Settings");
 		return true;
 	}
@@ -267,7 +267,7 @@ public class CameraView extends Activity {
 		gllay.setGravity(Gravity.CENTER);
 		gllay.addView(glview, params);
 		frame.addView(gllay);
-
+/*
 		ImageButton capture_button = new ImageButton(getApplicationContext());
 		capture_button.setImageDrawable(getResources().getDrawable(
 				android.R.drawable.ic_menu_camera));
@@ -300,9 +300,9 @@ public class CameraView extends Activity {
 		});
 		buttons.addView(focus_button);
 
-		frame.addView(buttons);
+		frame.addView(buttons); */
 		setContentView(frame);
-		makeToast(DIALOG_OPENING_TUTORIAL);
+		//		makeToast(DIALOG_OPENING_TUTORIAL);
 	}
 
 	@Override

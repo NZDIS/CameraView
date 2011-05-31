@@ -57,7 +57,8 @@ public:
   void calibrate(const char* filename);
 
   void drawText(int idx, image_pool* pool, const char* text);
-
+  void drawRate(int idx, image_pool* pool, const float rate);
+	
 private:
   cv::StarFeatureDetector stard;
   cv::FastFeatureDetector fastd;

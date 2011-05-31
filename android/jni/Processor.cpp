@@ -9,7 +9,7 @@
  */
 
 #include "Processor.h"
-
+#include <time.h>
 #include <sys/stat.h>
 
 using namespace cv;
@@ -41,6 +41,8 @@ void Processor::detectAndDrawFeatures(int input_idx, image_pool* pool, int featu
 {
   FeatureDetector* fd = 0;
 
+  clock_t start = clock() / (CLOCKS_PER_SEC / 1000);
+	
   switch (feature_type)
   {
     case DETECT_SURF:
@@ -75,6 +77,11 @@ void Processor::detectAndDrawFeatures(int input_idx, image_pool* pool, int featu
     circle(img, it->pt, 3, cvScalar(255, 0, 255, 0));
   }
 
+  clock_t stop = clock() / (CLOCKS_PER_SEC / 1000);
+	
+  float total = stop - start;
+  drawRate(input_idx, pool, (1.0 / total) * 1000);
+	
   //pool->addImage(output_idx,outimage);
 
 }
@@ -175,6 +182,7 @@ bool Processor::detectAndDrawChessboard(int idx, image_pool* pool)
 bool Processor::detectAndDrawFace(int idx, image_pool* pool)
 {	
 
+	clock_t start = clock() / (CLOCKS_PER_SEC / 1000);
     // Check whether the cascade has loaded successfully. Else report and error and quit.
     if( !cascade ) {
 		LOGE("Couldn't load the HAAR cascade.");
@@ -218,6 +226,10 @@ LOGI("Faces detected through HaarDetectObjects.");
 
 	// Release the temp image created.
 	// cvReleaseImage( &temp );
+	clock_t stop = clock() / (CLOCKS_PER_SEC / 1000);
+	
+	float total = stop - start;
+	drawRate(idx, pool, (1.0 / total ) * 1000);
 	
 	return true;
 }
@@ -252,6 +264,37 @@ void Processor::drawText(int i, image_pool* pool, const char* ctext)
   // then put the text itself
   putText(img, text, textOrg, fontFace, fontScale, Scalar::all(255), thickness, 8);
 }
+
+
+
+/**
+ * Draw Frames/s rate in a frame.
+ */
+void Processor::drawRate(int i, image_pool* pool, const float rate)
+{
+	char* str = new char[30];
+    sprintf(str, "%.4g", rate );    
+	string *text = new string("Rate: ");
+	text->append(str);
+	text->append(" frames/s");
+	int fontFace = FONT_HERSHEY_PLAIN;
+	double fontScale = 4;
+	int thickness = 2;
+	
+	Mat img = pool->getImage(i);
+	
+	int baseline = 0;
+	Size textSize = getTextSize(*text, fontFace, fontScale, thickness, &baseline);
+	baseline += thickness;
+	
+	// center the text
+	Point textOrg((img.cols - textSize.width) / 2, (img.rows - textSize.height * 2));
+		
+	// then put the text itself
+	putText(img, *text, textOrg, fontFace, fontScale, Scalar::all(255), thickness, 8);
+	delete text;
+}
+
 
 
 void saveCameraParams(const string& filename, Size imageSize, Size boardSize, float squareSize, float aspectRatio,

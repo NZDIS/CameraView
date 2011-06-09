@@ -37,11 +37,27 @@ Processor::~Processor()
     cvReleaseMemStorage(&storage);
 }
 
+
+// current frames/sec rate
+float rate = 0;
+// start and end of timing
+clock_t start_clock;
+clock_t end_clock;
+// how many frames we took into account
+int counter_clock = 1;
+
+
 void Processor::detectAndDrawFeatures(int input_idx, image_pool* pool, int feature_type)
 {
   FeatureDetector* fd = 0;
 
-  clock_t start = clock() / (CLOCKS_PER_SEC / 1000);
+  // initialise the clock counter if needed
+  if (counter_clock == 1) 
+  {
+	  start_clock = clock() / (CLOCKS_PER_SEC / 1000);
+  }
+  counter_clock++;
+
 	
   switch (feature_type)
   {
@@ -66,10 +82,6 @@ void Processor::detectAndDrawFeatures(int input_idx, image_pool* pool, int featu
 
   keypoints.clear();
 
-  //if(grayimage->step1() > sizeof(uchar)) return;
-  //cvtColor(*img,*grayimage,CV_RGB2GRAY);
-
-
   fd->detect(greyimage, keypoints);
 
   for (vector<KeyPoint>::const_iterator it = keypoints.begin(); it != keypoints.end(); ++it)
@@ -77,14 +89,18 @@ void Processor::detectAndDrawFeatures(int input_idx, image_pool* pool, int featu
     circle(img, it->pt, 3, cvScalar(255, 0, 255, 0));
   }
 
-  clock_t stop = clock() / (CLOCKS_PER_SEC / 1000);
 	
-  float total = stop - start;
-  drawRate(input_idx, pool, (1.0 / total) * 1000);
-	
-  //pool->addImage(output_idx,outimage);
+  if (rate < 2.0 || counter_clock > 10) {
+		end_clock = clock() / (CLOCKS_PER_SEC / 1000);
+        float total = end_clock - start_clock;
+        rate = ((counter_clock-1) / total) * 1000;
+        counter_clock = 1;
+  } 
 
+  drawRate(input_idx, pool, rate);
 }
+
+
 static double computeReprojectionErrors(const vector<vector<Point3f> >& objectPoints,
                                         const vector<vector<Point2f> >& imagePoints, const vector<Mat>& rvecs,
                                         const vector<Mat>& tvecs, const Mat& cameraMatrix, const Mat& distCoeffs,
@@ -175,14 +191,17 @@ bool Processor::detectAndDrawChessboard(int idx, image_pool* pool)
 }
 
 
-
 /**
  * Detect face using Haar cascade, and draw a circle around it.
  */
 bool Processor::detectAndDrawFace(int idx, image_pool* pool)
 {	
 
-	clock_t start = clock() / (CLOCKS_PER_SEC / 1000);
+	if (counter_clock == 1) {
+		start_clock = clock() / (CLOCKS_PER_SEC / 1000);
+	}
+	counter_clock++;
+	
     // Check whether the cascade has loaded successfully. Else report and error and quit.
     if( !cascade ) {
 		LOGE("Couldn't load the HAAR cascade.");
@@ -226,11 +245,13 @@ LOGI("Faces detected through HaarDetectObjects.");
 
 	// Release the temp image created.
 	// cvReleaseImage( &temp );
-	clock_t stop = clock() / (CLOCKS_PER_SEC / 1000);
-	
-	float total = stop - start;
-	drawRate(idx, pool, (1.0 / total ) * 1000);
-	
+	if (rate < 2 || counter_clock > 10) {
+		end_clock = clock() / (CLOCKS_PER_SEC / 1000);
+		float total = end_clock - start_clock;
+		rate = ((counter_clock-1) / total) * 10000;
+		counter_clock = 0;
+	}
+	drawRate(idx, pool, rate);
 	return true;
 }
 

@@ -16,7 +16,7 @@ been adopted from the OpenCV example application CVCamera.
  Prerequisites 
 ===============
 
-* Android NDK r5b
+* Android NDK (r5b or newer)
 * Android SDK
 * ant
 * CMake
@@ -71,6 +71,21 @@ AndroidOpenCV_DIR=$OPENCV_ROOT/android/android-opencv/build
 export OPENCV_ROOT OpenCV_DIR AndroidOpenCV_DIR
 
 
+
+ Building the demo
+===================
+
+from the main src directory, execute:
+
+mkdir build
+cd build
+cmake ..
+<if troubleshooting needed, see below>
+make
+cd ..
+<plug your device into your PC/Mac via USB>
+ant install 
+<enjoy>
 
 
 
